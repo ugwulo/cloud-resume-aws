@@ -1,24 +1,29 @@
-// visit counter code
+// visit count frontend implementation
+
 
 window.addEventListener('DOMContentLoaded', (event) => {
     getVisitCount();
 });
 
 // API endpoint
-const localFunctionApi = 'http://localhost:7071/api/ResumeCountFunc';
-const liveFunctionApi = 'https://resumecountfunc.azurewebsites.net/api/ResumeCountFunc?';
+const visitCountApi = 'https://0ry2i107ch.execute-api.us-east-1.amazonaws.com/prod/count?user=app'; // retrieve 'app' specific visit count
 
 const getVisitCount = () => {
-    let count = 10;
-    fetch(liveFunctionApi).then(response => {
-        return response.json()
-    }).then(response => {
-        console.log("Webpage called function API.");
-        count = response.count;
-        document.getElementById("counter").innerText = count
-    }).catch(function(error){
-        console.log(error);
-    });
-
-    return count;
+    fetch(visitCountApi, {
+        method: 'GET'
+      })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(response => {
+            console.log("Webpage called function API.");
+            const count = response.body.count;
+            document.getElementById("counter").innerText = count;
+        })
+        .catch(error => {
+            console.error('There was a problem with the fetch operation:', error);
+        });
 }
