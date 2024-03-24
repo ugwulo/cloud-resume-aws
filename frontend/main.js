@@ -1,14 +1,17 @@
-// visit count implementation
+// visit count frontend implementation
+
 
 window.addEventListener('DOMContentLoaded', (event) => {
     getVisitCount();
 });
 
 // API endpoint
-const liveFunctionApi = 'https://3b7gt1gdi3.execute-api.us-east-1.amazonaws.com/prod';
+const visitCountApi = 'https://0ry2i107ch.execute-api.us-east-1.amazonaws.com/prod/count?user=app'; // retrieve 'app' specific visit count
 
 const getVisitCount = () => {
-    fetch(liveFunctionApi)
+    fetch(visitCountApi, {
+        method: 'GET'
+      })
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -17,7 +20,7 @@ const getVisitCount = () => {
         })
         .then(response => {
             console.log("Webpage called function API.");
-            const count = response.count;
+            const count = response.body.count;
             document.getElementById("counter").innerText = count;
         })
         .catch(error => {

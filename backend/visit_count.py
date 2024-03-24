@@ -4,7 +4,8 @@ import json
 
 # lambda visit count API
 def lambda_handler(event, context):
-    # Extract user from query string parameters, defaulting to "app" user if not provided
+
+    # Extract user type from query string parameters, defaulting to "app" user if not provided
     query_params = event.get('queryStringParameters')
     user = query_params.get('user', 'app') if query_params else 'app'
     if not user:
@@ -32,19 +33,12 @@ def lambda_handler(event, context):
     table.put_item(Item={'user': user, 'count': visit_count})
 
     # set response body to count, more items could be added if necessary
-    count = f"{visit_count}"
+    count = {'count': f"{visit_count}"}
 
     # Prepare HTTP response
     http_resp = {
         'statusCode': 200,
-        'headers': {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': 'https://ugwulo.codes', # allow domain specific access
-            'Access-Control-Allow-Origin': 'http://127.0.0.1:5500', # allow CORS for local testing
-            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type'
-            },
-        'body': json.dumps({'count': count})
+        'body': json.dumps(count)
     }
 
     return http_resp
