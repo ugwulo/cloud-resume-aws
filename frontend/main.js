@@ -1,9 +1,17 @@
 // visit count frontend implementation
 
-
 window.addEventListener('DOMContentLoaded', (event) => {
     getVisitCount();
+    // callVisitCount(10);
 });
+
+
+// function to test email and Slack notifications through cloudwatch
+function callVisitCount(times) {
+    for (let i = 0; i < times; i++) {
+        getVisitCount();
+    }
+}
 
 // API endpoint
 const visitCountApi = 'https://0ry2i107ch.execute-api.us-east-1.amazonaws.com/prod/count?user=app'; // retrieve 'app' specific visit count
@@ -18,9 +26,9 @@ const getVisitCount = () => {
             }
             return response.json();
         })
-        .then(response => {
+        .then(data => {
             console.log("Webpage called function API.");
-            const count = response.body.count;
+            const count = data.count;
             document.getElementById("counter").innerText = count;
         })
         .catch(error => {
