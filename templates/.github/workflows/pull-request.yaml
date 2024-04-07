@@ -1,17 +1,15 @@
 name: Pull Request Workflow
 
 on:
-  push:
-    branches:
-      - 'actions'
+  - pull_request
 
 jobs:
   cloudformation-linter:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-	uses: actions/checkout@v3
+	      uses: actions/checkout@v3
       - name: Linter install
         uses: scottbrenner/cfn-lint-action@v2
-	with:
-	  command: cfn-lint -t ./main.yaml
+	      with:
+	        command: cfn-lint -t ./main.yaml
