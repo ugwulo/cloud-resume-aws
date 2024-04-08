@@ -1,4 +1,4 @@
-template-file-path: ./main.yaml
+template-file-path: main.yaml
 tags: 
   Name: 'gitsync'
   Project: 'Demo1'
