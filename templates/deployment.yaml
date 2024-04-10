@@ -1,4 +1,58 @@
-template-file-path: main.yaml
-tags: 
-  Name: 'gitsync'
-  Project: 'Demo1'
+AWSTemplateFormatVersion: 2010-09-09
+Description: Demo Formation
+
+Parameters: 
+  Environment:
+    Description: Environment Name
+    Type: String
+
+Resources: 
+  lambdaFunctionIamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service: "lambda.amazonaws.com"
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: "S3-Full-Access-and-Logs"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+                - Effect: "Allow"
+                  Action: 
+                    - "s3*"
+                    - "logs:CreateLogGroup"
+                    - "logs:CreateLogStream"
+                    - "logs:CreateLogEvents"
+                  Resource: "S3:*"
+  s3Bucket:
+    Type: AWS::S3::Bucket
+    Properties: 
+      BucketName: resume-lambda-bucket-01
+      Tags:
+        - Key: key
+          Value: value
+
+  lambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: "Test Function"
+      FunctionName: !Sub test-function${Environment}
+      Handler: backend/test.lambda_handler
+      MemorySize: 128
+      Role: !GetAtt lambdaFunctionIamRole.Arn
+      Runtime: python3.9
+      Timeout: 30
+      Environment:
+        Variables:
+          key1: value1
+      Code:
+        S3Bucket: resume-lambda-bucket-01
+        S3Key: lambda.zip
+      Tags:
+        - Key: keyname
+          Value: value
