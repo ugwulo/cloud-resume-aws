@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: Install Zip Tool
-        uses: nontudor/action-zip@v1
+        uses: montudor/action-zip@v1
 
       - name: Create artifact/publish directory if not exists
         run: mkdir -p ./artifact/publish
