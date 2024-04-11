@@ -18,6 +18,7 @@ jobs:
 
       - name: Copy lambda code to artifact directory
         run: cp ./backend/test.py ./artifact/publish
+        working-directory: /
 
       - name: Create zip file for lambda
         run: zip -qq -r lambda.zip .
