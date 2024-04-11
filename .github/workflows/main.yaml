@@ -18,12 +18,12 @@ jobs:
 
       - name: List files in current directory
         run: ls -la
-        
+
       - name: List files in backend directory
         run: ls -la backend
 
       - name: Copy lambda code to artifact directory
-        run: cp backend/test.py ./artifact/publish
+        run: cp ./backend/test.py ./artifact/publish
 
       - name: Create zip file for lambda
         run: zip -qq -r lambda.zip .
