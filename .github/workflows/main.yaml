@@ -17,7 +17,7 @@ jobs:
         run: mkdir -p ./artifact/publish
 
       - name: Create zip file for lambda
-        run: cd backend && zip -j ./artifact/publish/lambda.zip test.py
+        run: cd ../../backend && zip -j ./artifact/publish/lambda.zip test.py
         working-directory: artifact/publish
 
       - uses: actions/upload-artifact@v3
