@@ -16,6 +16,12 @@ jobs:
       - name: Create artifact/publish directory if not exists
         run: mkdir -p ./artifact/publish
 
+      - name: List files in current directory
+        run: ls -la
+        
+      - name: List files in backend directory
+        run: ls -la backend
+
       - name: Copy lambda code to artifact directory
         run: cp backend/test.py ./artifact/publish
 
