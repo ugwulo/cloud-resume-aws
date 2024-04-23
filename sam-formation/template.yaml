@@ -1,13 +1,23 @@
-AWSTemplateFormatVersion: "2010-09-09"
+AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: >
+Description: |
   cloud-resume-challenge template file with aws-sam
 
+Resources:
 
-Resources: 
-  
+  resumeRoute53Record:
+    Type: AWS::Route53::RecordSetGroup
+    Properties:
+      HostedZoneId: Z08600273CBKLO67XNB2F
+      RecordSets:
+        - Name: ugwulo.codes-bucket
+          Type: A
+          AliasTarget:
+            HostedZoneId: E4T18QJ12NZSP
+            DNSName: !GetAtt resumeDistribution.DomainName
+
   resumeDistribution:
-    Type: "AWS::CloudFront::Distribution"
+    Type: AWS::CloudFront::Distribution
     Properties:
       DistributionConfig:
         DefaultCacheBehavior:
@@ -23,18 +33,18 @@ Resources:
             Id: ugwulo.codes-bucket.s3-website-us-east-1.amazonaws.com
             CustomOriginConfig:
               OriginProtocolPolicy: match-viewer
-        Enabled: "true"
+        Enabled: 'true'
         DefaultRootObject: index.html
 
   resumeBucket:
     Type: AWS::S3::Bucket
-    Properties: 
+    Properties:
       BucketName: ugwulo.codes-bucket
       PublicAccessBlockConfiguration:
-        BlockPublicAcls       : true
-        BlockPublicPolicy     : false # Will allow the creation of the policy
-        IgnorePublicAcls      : true
-        RestrictPublicBuckets : false # Will allow non-AWS entities to read what is inside the bucket
+        BlockPublicAcls: true
+        BlockPublicPolicy: false # Will allow the creation of the policy
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: false # Will allow non-AWS entities to read what is inside the bucket
       WebsiteConfiguration:
         IndexDocument: index.html
         ErrorDocument: 404.html
@@ -51,11 +61,11 @@ Resources:
         Statement:
           - Sid: PublicReadForGetBucketObjects
             Effect: Allow
-            Principal: "*"
-            Action: "s3:GetObject"
+            Principal: '*'
+            Action: s3:GetObject
             Resource: !Join
-              - ""
-              - - "arn:aws:s3:::"
+              - ''
+              - - 'arn:aws:s3:::'
                 - !Ref resumeBucket
                 - /*
       Bucket: !Ref resumeBucket
