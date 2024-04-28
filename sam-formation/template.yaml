@@ -14,6 +14,9 @@ Resources:
   resumePutFunction:
     Type: AWS::Serverless::Function
     Properties:
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: "resume-count-table"
       CodeUri: backend/put-api-lambda/
       Handler: put-count.lambda_handler
       Runtime: python3.9
@@ -28,6 +31,9 @@ Resources:
   resumeGetFunction:
     Type: AWS::Serverless::Function
     Properties:
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: "resume-count-table"
       CodeUri: backend/get-api-lambda/
       Handler: get-count.lambda_handler
       Runtime: python3.9
