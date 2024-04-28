@@ -11,6 +11,46 @@ Parameters:
 
 Resources:
 
+  resumePutFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: backend/put-api-lambda/
+      Handler: put-count.lambda_handler
+      Runtime: python3.9
+      Tracing: Active
+      Events:
+        CatchAll:
+          Type: Api
+          Properties:
+            Path: /put
+            Method: GET
+
+  resumeGetFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: backend/get-api-lambda/
+      Handler: get-count.lambda_handler
+      Runtime: python3.9
+      Tracing: Active
+      Events:
+        CatchAll:
+          Type: Api
+          Properties:
+            Path: /get
+            Method: GET
+
+  resumeDynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: resume-count-table
+      BillingMode: PAY_PER_REQUEST # On-demand billing
+      AttributeDefinitions:
+        - AttributeName: "ID"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "ID"
+          KeyType: "HASH"
+   
   resumeRoute53Record:
     Type: "AWS::Route53::RecordSetGroup"
     Properties:
