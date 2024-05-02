@@ -25,9 +25,30 @@ jobs:
       - run: sam deploy --config-file samconfig.toml --no-confirm-changeset --no-fail-on-empty-changeset
         working-directory: sam-formation
       
-      # - name: Upload to S3
-      #   run: aws s3 cp ./artifact/lambda.zip s3://resume-lambda-bucket-01
-      # - name: test get-function
-      #   run: cd resume-challenge/get-function && go test -v ./ && ../../
-      # - name: test put-function
-      #   run: cd resume-challenge/put-function && go test -v ./ && ../../
+  deploy-site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: action/checkout@v2
+
+      - name: Check for changes in frontend
+        id: check_changes
+        run: |
+          if git diff --quiet HEAD^ HEAD sam-formation/frontend; then
+            echo "No changes in sam-formation/frontend"
+            echo "::set-output name=changes::false"
+          else
+            echo "Changes detected in sam-formation/frontend"
+            echo "::set-output name=changes::true"
+          fi
+
+      - name: Deploy if changes detected
+        if: steps.check_changes.outputs.changes == 'true'
+        run: |
+          - uses: jakejarvis/s3-sync-action@master
+            with:
+              args: --delete
+            env:
+              AWS-S3-BUCKET: ugwulo.codes
+              aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+              aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              SOURCE-DIR: cloud-resume-aws/sam-formation/frontend
