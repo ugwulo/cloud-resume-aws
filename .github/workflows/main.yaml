@@ -1,36 +1,17 @@
-name: Cloudformation
+name: resume-deployment
 
 on:
   push:
-    branches: [ nulls ]
+    branches: [ actions ]
 
 jobs:
-  deploy:
-
+  build-infra:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 2
     steps:
-      - name: Install Zip Tool
-        uses: montudor/action-zip@v1
-
-      - name: Create artifact/publish directory if not exists
-        run: mkdir -p ./artifact/publish
-
-      - name: Copy lambda code to artifact directory
-        run: cp ./backend/test.py ./artifact/publish
-        working-directory: /
-
-      - name: Create zip file for lambda
-        run: zip -qq -r lambda.zip .
-        working-directory: artifact/publish
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: lambda
-          path: ./artifact
-
-      - name: Copy Cloudformation Template
-        run: cp ./templates/deployment.yaml ./artifact/deployment.yaml
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+      - uses: aws-actions/setup-sam@v1
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -38,6 +19,14 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
+      - run: sam build
+        working-directory: sam-formation
+      - run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset
+        working-directory: sam-formation
       
-      - name: Upload to S3
-        run: aws s3 cp ./artifact/lambda.zip s3://resume-lambda-bucket-01
+      # - name: Upload to S3
+      #   run: aws s3 cp ./artifact/lambda.zip s3://resume-lambda-bucket-01
+      # - name: test get-function
+      #   run: cd resume-challenge/get-function && go test -v ./ && ../../
+      # - name: test put-function
+      #   run: cd resume-challenge/put-function && go test -v ./ && ../../
