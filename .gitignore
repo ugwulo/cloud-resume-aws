@@ -1,6 +1,5 @@
 .vscode
 .aws-sam
-samconfig.toml
 
 
 # Created by https://www.gitignore.io/api/osx,linux,python,windows,pycharm,visualstudiocode
