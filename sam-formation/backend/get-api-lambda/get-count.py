@@ -20,7 +20,7 @@ def lambda_handler(event, context):
     # set response body to count, more items could be added if necessary
     count = {'count': f"{visit_count}"}
 
-    # Prepare HTTP response
+    # Prepare HTTP responses
     http_resp = {
         'headers': {
             "Access-Control-Allow-Origin": "*",
