@@ -1,0 +1,69 @@
+name: resume-deployment
+
+on:
+  push:
+    branches: [ actions ]
+
+jobs:
+  build-infra:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Check for changes in backend
+        id: check_changes
+        run: |
+          if git diff --quiet HEAD^ HEAD sam-formation/backend; then
+            echo "No changes in sam-formation/backend"
+            echo "::set-output name=changes::false"
+          else
+            echo "Changes detected in sam-formation/backend"
+            echo "::set-output name=changes::true"
+          fi
+
+      - name: Deploy if changes detected
+        if: steps.check_changes.outputs.changes == 'true'
+        run: |
+          - uses: actions/setup-python@v2
+            with:
+              python-version: '3.9'
+          - uses: aws-actions/setup-sam@v1
+
+          - name: Configure AWS Credentials
+            uses: aws-actions/configure-aws-credentials@v1
+            with:
+              aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+              aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              aws-region: us-east-1
+          - run: sam build
+            working-directory: sam-formation
+          - run: sam deploy --config-file samconfig.toml --no-confirm-changeset --no-fail-on-empty-changeset
+            working-directory: sam-formation
+      
+  deploy-site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Check for changes in frontend
+        id: check_changes
+        run: |
+          if git diff --quiet HEAD^ HEAD sam-formation/frontend; then
+            echo "No changes in sam-formation/frontend"
+            echo "::set-output name=changes::false"
+          else
+            echo "Changes detected in sam-formation/frontend"
+            echo "::set-output name=changes::true"
+          fi
+
+      - name: Deploy if changes detected
+        if: steps.check_changes.outputs.changes == 'true'
+        run: |
+          - uses: jakejarvis/s3-sync-action@master
+            with:
+              args: --delete
+            env:
+              AWS-S3-BUCKET: ugwulo.codes
+              aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+              aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              SOURCE-DIR: cloud-resume-aws/sam-formation/frontend
