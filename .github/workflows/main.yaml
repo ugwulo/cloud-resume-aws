@@ -3,7 +3,7 @@ name: resume-deployment
 on:
   push:
     branches:
-      - 'mains'
+      - 'main'
     paths:
       - 'sam-formation/frontend/**'
       - 'sam-formation/backend/**'
