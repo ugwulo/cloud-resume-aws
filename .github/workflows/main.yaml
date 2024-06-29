@@ -3,58 +3,57 @@ name: resume-deployment
 on:
   push:
     branches:
-      - 'main'
+      - main
     paths:
       - 'sam-formation/frontend/**'
       - 'sam-formation/backend/**'
   pull_request:
     branches:
-      - 'main'
+      - main
     paths:
       - 'sam-formation/frontend/**'
       - 'sam-formation/backend/**'
 
 jobs:
   frontend-build:
-    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' && (github.event.commits.*.modified | contains('sam-formation/frontend/**')) }}
+    if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && contains(github.event.commits.*.modified, 'sam-formation/frontend')) }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Deploy frontend
-        run: |
-          - uses: jakejarvis/s3-sync-action@master
-            with:
-              args: --delete
-            env:
-              AWS-S3-BUCKET: ugwulo.codes
-              aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
-              aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-              SOURCE-DIR: cloud-resume-aws/sam-formation/frontend
+      - name: Deploy frontend to S3
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --delete
+        env:
+          AWS_S3_BUCKET: ugwulo.codes
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          SOURCE_DIR: sam-formation/frontend
 
       - name: Invalidate CloudFront cache
         run: |
           aws cloudfront create-invalidation --distribution-id EO4GDEKEJTLWQ --paths "/*"
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        
 
-      
   lambda-backend-build:
-    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' && (github.event.commits.*.modified | contains('sam-formation/backend/**')) }}
+    if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && contains(github.event.commits.*.modified, 'sam-formation/backend')) }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Setup Python and SAM
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+
+      - name: Install SAM CLI
         run: |
-          - uses: actions/setup-python@v2
-            with:
-              python-version: '3.9'
-          - uses: aws-actions/setup-sam@v1
+          pip install aws-sam-cli
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -62,7 +61,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
-              
+
       - name: Build SAM application
         run: |
           cd sam-formation/backend
