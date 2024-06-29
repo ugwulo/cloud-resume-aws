@@ -2,62 +2,27 @@ name: resume-deployment
 
 on:
   push:
-    branches: [ actions ]
+    branches:
+      - 'mains'
+    paths:
+      - 'sam-formation/frontend/**'
+      - 'sam-formation/backend/**'
+  pull_request:
+    branches:
+      - 'main'
+    paths:
+      - 'sam-formation/frontend/**'
+      - 'sam-formation/backend/**'
 
 jobs:
-  build-infra:
+  frontend-build:
+    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' && (github.event.commits.*.modified | contains('sam-formation/frontend/**')) }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-      - name: Check for changes in backend
-        id: check_changes
-        run: |
-          if git diff --quiet HEAD^ HEAD sam-formation/backend; then
-            echo "No changes in sam-formation/backend"
-            echo "::set-output name=changes::false"
-          else
-            echo "Changes detected in sam-formation/backend"
-            echo "::set-output name=changes::true"
-          fi
-
-      - name: Deploy if changes detected
-        if: steps.check_changes.outputs.changes == 'true'
-        run: |
-          - uses: actions/setup-python@v2
-            with:
-              python-version: '3.9'
-          - uses: aws-actions/setup-sam@v1
-
-          - name: Configure AWS Credentials
-            uses: aws-actions/configure-aws-credentials@v1
-            with:
-              aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
-              aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-              aws-region: us-east-1
-          - run: sam build
-            working-directory: sam-formation
-          - run: sam deploy --config-file samconfig.toml --no-confirm-changeset --no-fail-on-empty-changeset
-            working-directory: sam-formation
-      
-  deploy-site:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Check for changes in frontend
-        id: check_changes
-        run: |
-          if git diff --quiet HEAD^ HEAD sam-formation/frontend; then
-            echo "No changes in sam-formation/frontend"
-            echo "::set-output name=changes::false"
-          else
-            echo "Changes detected in sam-formation/frontend"
-            echo "::set-output name=changes::true"
-          fi
-
-      - name: Deploy if changes detected
-        if: steps.check_changes.outputs.changes == 'true'
+      - name: Deploy frontend
         run: |
           - uses: jakejarvis/s3-sync-action@master
             with:
@@ -67,3 +32,43 @@ jobs:
               aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
               aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
               SOURCE-DIR: cloud-resume-aws/sam-formation/frontend
+
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation --distribution-id EO4GDEKEJTLWQ --paths "/*"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        
+
+      
+  lambda-backend-build:
+    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' && (github.event.commits.*.modified | contains('sam-formation/backend/**')) }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Python and SAM
+        run: |
+          - uses: actions/setup-python@v2
+            with:
+              python-version: '3.9'
+          - uses: aws-actions/setup-sam@v1
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+              
+      - name: Build SAM application
+        run: |
+          cd sam-formation/backend
+          sam build
+
+      - name: Deploy SAM application
+        run: |
+          cd sam-formation/backend
+          sam deploy --no-confirm-changeset --capabilities CAPABILITY_IAM --stack-name cloud-resume
