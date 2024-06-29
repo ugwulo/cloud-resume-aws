@@ -56,36 +56,6 @@ Resources:
       KeySchema:
         - AttributeName: "ID"
           KeyType: "HASH"
-   
-  resumeRoute53Record:
-    Type: "AWS::Route53::RecordSetGroup"
-    Properties:
-      HostedZoneId: Z08600273CBKLO67XNB2F
-      RecordSets:
-        - Name: !Ref DomainName
-          Type: A
-          AliasTarget:
-            HostedZoneId: Z2FDTNDATAQYW2
-            DNSName: !GetAtt resumeDistribution.DomainName
-
-  resumeDistribution:
-    Type: AWS::CloudFront::Distribution
-    Properties:
-      DistributionConfig:
-        Origins:
-        - DomainName: ugwulo.codes.s3-website-us-east-1.amazonaws.com
-          Id: ugwulo.codes.s3-website-us-east-1.amazonaws.com
-          CustomOriginConfig:
-            OriginProtocolPolicy: 'match-viewer'
-        Enabled: 'true'
-        DefaultCacheBehavior:
-          ViewerProtocolPolicy: 'allow-all'
-          TargetOriginId: ugwulo.codes.s3-website-us-east-1.amazonaws.com
-          DefaultTTL: 0
-          MinTTL: 0
-          MaxTTL: 0
-          ForwardedValues:
-            QueryString: false
 
   resumeBucket:
     Type: AWS::S3::Bucket

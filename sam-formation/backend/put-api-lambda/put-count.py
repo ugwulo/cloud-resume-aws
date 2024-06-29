@@ -1,17 +1,16 @@
 import boto3
-import os
 import json
 
-# lambda visit count API
+# Initialize DynamoDB client
+dynamodb = boto3.resource('dynamodb')
+table_name = "resume-count-table"
+table = dynamodb.Table(table_name)
+
+# lambda visit count PUT handler
 def lambda_handler(event, context):
 
     visit_count = 0
     user = "Resume App"
-
-    # Create DynamoDB client
-    dynamodb = boto3.resource('dynamodb')
-    table_name = "resume-count-table"
-    table = dynamodb.Table(table_name)
 
     # Get current visit count
     response = table.get_item(Key={'ID': user})
