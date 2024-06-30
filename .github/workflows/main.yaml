@@ -32,6 +32,15 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           SOURCE_DIR: sam-formation/frontend
 
+      - name: Install AWS CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y awscli
+        shell: bash
+
+      - name: Check AWS CLI version
+        run: aws --version
+
       - name: Invalidate CloudFront cache
         run: |
           aws cloudfront create-invalidation --distribution-id EO4GDEKEJTLWQ --paths "/*"
@@ -64,10 +73,10 @@ jobs:
 
       - name: Build SAM application
         run: |
-          cd sam-formation/backend
+          cd sam-formation
           sam build
 
       - name: Deploy SAM application
         run: |
-          cd sam-formation/backend
+          cd sam-formation
           sam deploy --no-confirm-changeset --capabilities CAPABILITY_IAM --stack-name cloud-resume
