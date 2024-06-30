@@ -6,9 +6,17 @@ on:
       - main
     paths:
       - 'sam-formation/frontend/**'
+      - 'sam-formation/backend/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'sam-formation/frontend/**'
+      - 'sam-formation/backend/**'
 
 jobs:
   frontend-build:
+    if: contains(toJSON(github.event.commits.*.modified), 'sam-formation/frontend/')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -46,3 +54,36 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+  lambda-backend-build:
+    if: contains(toJSON(github.event.commits.*.modified), 'sam-formation/backend/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Python and SAM
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+
+      - name: Install SAM CLI
+        run: |
+          pip install aws-sam-cli
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Build SAM application
+        run: |
+          cd sam-formation
+          sam build
+
+      - name: Deploy SAM application
+        run: |
+          cd sam-formation
+          sam deploy --no-confirm-changeset --capabilities CAPABILITY_IAM --stack-name cloud-resume
