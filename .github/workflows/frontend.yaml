@@ -1,4 +1,4 @@
-name: resume-deployment
+name: frontend-deployment
 
 on:
   push:
