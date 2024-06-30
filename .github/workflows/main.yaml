@@ -7,16 +7,10 @@ on:
     paths:
       - 'sam-formation/frontend/**'
       - 'sam-formation/backend/**'
-  pull_request:
-    branches:
-      - main
-    paths:
-      - 'sam-formation/frontend/**'
-      - 'sam-formation/backend/**'
 
 jobs:
   frontend-build:
-    if: contains(toJSON(github.event.commits.*.modified), 'sam-formation/frontend/')
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && startsWith(github.event.head_commit.id, github.sha) && contains(github.event.head_commit.modified, 'sam-formation/frontend/')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -56,7 +50,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
   lambda-backend-build:
-    if: contains(toJSON(github.event.commits.*.modified), 'sam-formation/backend/')
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && startsWith(github.event.head_commit.id, github.sha) && contains(github.event.head_commit.modified, 'sam-formation/backend/')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
