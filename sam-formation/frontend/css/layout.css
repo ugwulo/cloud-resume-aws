@@ -208,7 +208,7 @@ ul#nav li.current a { color: #F06000; }
 #about .profile-pic {
    position: relative;
    width: 200px;
-   height: 220px;
+   height: 240px;
    border-radius: 100%;
 }
 #about .contact-details { width: 41.66667%; }
@@ -280,6 +280,72 @@ ul#nav li.current a { color: #F06000; }
    font: 15px/24px 'opensans-regular', sans-serif;
    margin-top: 6px;
 }
+
+/* Blog section */
+
+.blog-section {
+   padding: 20px;
+   text-align: center;
+   background-color: #111010;
+   box-shadow: 0 0 10px rgba(0,0,0,0.1);
+   margin: 20px auto;
+   max-width: fit-content;
+   border-radius: 10px;
+}
+
+.blog-section h2 {
+   margin-bottom: 20px;
+   font-size: 24px;
+   color: #fff;
+   align-self: center;
+}
+
+.blog-container {
+   display: flex;
+   flex-wrap: wrap;
+   justify-content: space-around;
+}
+
+.blog-post {
+   width: 30%;
+   margin-bottom: 20px;
+   border: 1px solid #ddd;
+   border-radius: 8px;
+   overflow: hidden;
+   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+   transition: transform 0.2s;
+}
+
+.blog-post:hover {
+   transform: scale(1.05);
+}
+
+.blog-post img {
+   width: 100%;
+   height: auto;
+}
+
+.blog-post h3 {
+   margin: 10px 0;
+   text-align: center;
+   padding-left: 4px;
+   font-size: 18px;
+   color: #fff;
+   text-decoration: none;
+}
+
+.blog-post a {
+   text-decoration: none;
+   color: inherit;
+   display: block;
+   transition: color 0.2s;
+}
+
+.blog-post a:hover h3 {
+   color: #3f3e3e;
+}
+
+/* Existing CSS */
 
 /*----------------------------------------------*/
 /*	Skill Bars
